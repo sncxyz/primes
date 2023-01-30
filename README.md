@@ -2,7 +2,7 @@
 
 A library for generating primes with a segmented sieve of Eratosthenes.
 
-Iterators are used so that memory usage is minimal.
+Iterators are used so that memory usage is minimal, and the iterators are lazy.
 
 ## Examples
 
