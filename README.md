@@ -6,7 +6,7 @@ Iterators are used so that memory usage is minimal.
 
 ## Examples
 
-```
+```rs
 let first_10: Vec<_> = primes::first(10).collect();
 assert_eq!(&first_10, &[2, 3, 5, 7, 11, 13, 17, 19, 23, 29]);
 
