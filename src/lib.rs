@@ -309,16 +309,15 @@ impl Iterator for Divisors {
                 return None;
             }
             if let Some(prime) = self.primes.next() {
+                if prime * prime > self.n {
+                    let prime = self.n;
+                    self.n = 1;
+                    return Some((prime, 1));
+                }
                 let mut exponent = 0;
-                while self.n > 1 {
-                    let quot = self.n / prime;
-                    let rem = self.n % prime;
-                    if rem == 0 {
-                        self.n = quot;
-                        exponent += 1;
-                    } else {
-                        break;
-                    }
+                while self.n % prime == 0 {
+                    self.n /= prime;
+                    exponent += 1;
                 }
                 if exponent > 0 {
                     return Some((prime, exponent));
