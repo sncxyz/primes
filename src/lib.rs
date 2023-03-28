@@ -13,11 +13,17 @@
 //!
 //! let nth_100 = primes::nth(100);
 //! assert_eq!(nth_100, Some(541));
+//!
+//! let divisors_504: Vec<_> = primes::divisors(504).collect();
+//! assert_eq!(&divisors_504, &[(2, 3), (3, 2), (7, 1)]);
+//!
+//! let is_prime_53 = primes::is_prime(53);
+//! assert_eq!(is_prime_53, true);
 //! ```
 
 const SIZE: usize = 64_000;
 
-/// Returns an iterator that yields the first `n` primes.
+/// Returns an iterator over the first `n` primes.
 ///
 /// # Examples
 ///
@@ -30,7 +36,7 @@ pub fn first(n: u64) -> Primes {
     Primes::new(n)
 }
 
-/// Returns an iterator that yields the primes less than or equal to `n`.
+/// Returns an iterator over the primes less than or equal to `n`.
 ///
 /// # Examples
 ///
@@ -43,7 +49,7 @@ pub fn below(n: u64) -> PrimesBelow {
     PrimesBelow::new(n)
 }
 
-// Returns the `n`th prime, with `primes::nth(1) = Some(2)`.
+/// Returns the `n`th prime, with `primes::nth(1) = Some(2)`.
 ///
 /// # Examples
 ///
@@ -54,6 +60,46 @@ pub fn below(n: u64) -> PrimesBelow {
 #[inline(always)]
 pub fn nth(n: u64) -> Option<u64> {
     first(n).last()
+}
+
+/// Returns an iterator over the prime divisors of `n`, and their exponents.
+///
+/// e.g. `(2, 4)` means the prime `2` divides `n` with exponent `4`.
+///
+/// # Examples
+///
+/// ```
+/// let divisors_504: Vec<_> = primes::divisors(504).collect();
+/// assert_eq!(&divisors_504, &[(2, 3), (3, 2), (7, 1)]);
+///
+/// let divisors_25: Vec<_> = primes::divisors(25).collect();
+/// assert_eq!(&divisors_25, &[(5, 2)]);
+///
+/// let divisors_53: Vec<_> = primes::divisors(53).collect();
+/// assert_eq!(&divisors_53, &[(53, 1)]);
+/// ```
+#[inline(always)]
+pub fn divisors(n: u64) -> Divisors {
+    Divisors::new(n)
+}
+
+/// Returns `true` if `n` is prime, or `false` otherwise.
+///
+/// # Examples
+///
+/// ```
+/// let is_prime_504 = primes::is_prime(504);
+/// assert_eq!(is_prime_504, false);
+///
+/// let is_prime_25 = primes::is_prime(25);
+/// assert_eq!(is_prime_25, false);
+///
+/// let is_prime_53 = primes::is_prime(53);
+/// assert_eq!(is_prime_53, true);
+/// ```
+#[inline(always)]
+pub fn is_prime(n: u64) -> bool {
+    divisors(n).next().map_or(false, |d| d.0 == n)
 }
 
 pub struct Primes {
@@ -237,4 +283,51 @@ impl Sieve {
 enum State {
     Prime,
     Composite,
+}
+
+pub struct Divisors {
+    n: u64,
+    primes: PrimesBelow,
+}
+
+impl Divisors {
+    fn new(n: u64) -> Self {
+        let sqrt = (n as f64).sqrt() as u64;
+        Self {
+            n,
+            primes: below(sqrt),
+        }
+    }
+}
+
+impl Iterator for Divisors {
+    type Item = (u64, u64);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            if self.n <= 1 {
+                return None;
+            }
+            if let Some(prime) = self.primes.next() {
+                let mut exponent = 0;
+                while self.n > 1 {
+                    let quot = self.n / prime;
+                    let rem = self.n % prime;
+                    if rem == 0 {
+                        self.n = quot;
+                        exponent += 1;
+                    } else {
+                        break;
+                    }
+                }
+                if exponent > 0 {
+                    return Some((prime, exponent));
+                }
+            } else {
+                let prime = self.n;
+                self.n = 1;
+                return Some((prime, 1));
+            }
+        }
+    }
 }
