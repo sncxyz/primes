@@ -2,6 +2,10 @@
 //!
 //! Iterators are used so that memory usage is minimal, and the iterators are lazy.
 //!
+//! If all primes below `n` are generated, heap memory is only used to store primes below `sqrt(n)`.
+//! For example, if `n = 100_000_000`, only primes below `10_000` are stored on the heap, of which there are 1229.
+//! This puts the total heap usage by the iterator at 1229 * 8 = 9832 bytes.
+//!
 //! # Examples
 //!
 //! ```
